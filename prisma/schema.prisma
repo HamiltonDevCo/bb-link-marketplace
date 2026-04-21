@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Site {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  domain      String   @unique
+  name        String
+  niche       String
+  description String
+  dr          Int      @default(0)
+  da          Int      @default(0)
+  priceGuest  Int
+  priceLink   Int
+  turnaround  Int      @default(3)
+  dofollow    Boolean  @default(true)
+  maxLinks    Int      @default(2)
+  active      Boolean  @default(true)
+  ga4Id       String?
+  gtmId       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orders      Order[]
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  siteId          String
+  site            Site        @relation(fields: [siteId], references: [id])
+  type            OrderType
+  status          OrderStatus @default(PAID)
+  stripeSessionId String      @unique
+  amountPaid      Int
+  clientEmail     String
+  clientName      String
+  targetUrl       String
+  anchorText      String
+  contentNotes    String?
+  dofollow        Boolean     @default(true)
+  publishedUrl    String?
+  assignedTo      String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+enum OrderType {
+  GUEST_POST
+  LINK_INSERT
+}
+
+enum OrderStatus {
+  PAID
+  IN_PROGRESS
+  REVIEW
+  PUBLISHED
+  CANCELLED
+}
